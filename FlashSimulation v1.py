@@ -12,12 +12,19 @@ import matplotlib.pyplot as plt
 maxH = 100
 maxL = 310
 
+# MATERIALS LIST
 AIR = 0
 DISILICATE = 1
 PLATINUM = 2
 
+# Radius and Length for the matrix construction
 RADIUS = 35
+ELECTRODE_RADIUS = 2
 LENGTH = 16
+
+# Interpolation tipes
+INTERPOLATION = "None"
+'''INTERPOLATION = "bilinear"'''
 
 # Obj to help with radius calculation
 class circle:
@@ -25,13 +32,12 @@ class circle:
         self.x = x
         self.y = y
 
-# Create the Temperature matrix
+# Create the Temperature and Composition matrix
 temperature = np.zeros((maxH,maxL))
 composition = np.zeros((maxH,maxL))
 
 circle1 = circle(50,50)
 circle2 = circle(50,260)
-
 
 # DOG BONE PART 1 - Draw the circles, in the dog bone
 for i in range(0, maxH):
@@ -50,10 +56,16 @@ for i in range(0, maxH):
             if (circle1.y <= j and j <= circle2.y):
                 composition[i,j] = DISILICATE
 
-plt.imshow(composition)
+# PLATINUM ELECTRODE
+for i in range(0, maxH):
+    for j in range(0, maxL):
+        if(((circle1.x - i)**2 + (circle1.y - j)**2 ) <= ELECTRODE_RADIUS**2 ):
+            composition[i,j] = PLATINUM
+        if(((circle2.x - i)**2 + (circle2.y - j)**2 ) <= ELECTRODE_RADIUS**2 ):
+            composition[i,j] = PLATINUM
 
 
-#plt.matshow(np.random.random((500,500)))
-#plt.imshow(np.random.random((500,500)))
-plt.colorbar()
+# Display the image
+plt.imshow(composition, interpolation=INTERPOLATION)
+#plt.colorbar()
 plt.show()
