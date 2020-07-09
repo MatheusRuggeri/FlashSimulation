@@ -37,6 +37,13 @@ class circle:
     def __init__(self, x, y):
         self.x = x
         self.y = y
+        
+def heatDiffusion(TOld):
+    i = 1; j = 1;
+    Residuo = ((TOld[i+1,j]-2*TOld[i,j]+TOld[i-1,j])/DX**2)
+    Residuo += ((TOld[i,j+1]-2*TOld[i,j]+TOld[i,j-1])/DY**2)
+    Residuo *= DT
+    return Residuo
 
 # Create the Temperature and Composition matrix
 temperature = np.zeros((maxH,maxL))
@@ -75,19 +82,23 @@ for i in range(0, maxH):
             composition[i,j] = PLATINUM
             temperature[i,j] = 300
 
-# Heat transfer
+# Heat diffusion
+print("Start simulation...")
 nRun = 0
+plt.imshow(temperature, interpolation=INTERPOLATION)
+plt.savefig('test'+str(nRun)+'.png', dpi=1000)
 while (True):
     nRun += 1
-    ERR = 0
     TOld = temperature
     for i in range(2, maxH-1):
         for j in range(2, maxL-1):
-            Residuo=(DT*((TOld[i+1,j]-2*TOld[i,j]+TOld[i-1,j])/DX**2 + (TOld[i,j+1]-2*TOld[i,j]+TOld[i,j-1])/DY**2) + TOld[i,j])-temperature[i,j]
-            ERR=ERR+abs(Residuo)
-            temperature[i,j]=temperature[i,j]+Residuo
+            Tvar = heatDiffusion(TOld[i-1:i+2,j-1:j+2])
+            temperature[i,j] = temperature[i,j] + Tvar
     if (nRun % 10 == 0):
         # Display the image
+        print("Img exporting...")
         plt.imshow(temperature, interpolation=INTERPOLATION)
+        plt.savefig('test'+str(nRun)+'.png', dpi=1000)
+        print("Img exported")
         #plt.colorbar()
         plt.show()
