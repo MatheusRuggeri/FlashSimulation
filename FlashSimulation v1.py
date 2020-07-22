@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import math
 import random
+from scipy import ndimage
 
 
 # Matrix max size
@@ -95,8 +96,8 @@ def percolation(connection, composition, temperature):
         for i in range(0, maxH):
             for j in range(0, maxL):
                 if(composition[i,j] == DISILICATE):
-                    SumTemp = SumTemp + math.exp((temperature[i,j] + 273)/1000);
-        newPart = random.random() * SumTemp;
+                    SumTemp = SumTemp + math.exp((temperature[i,j] + 273)/1000)
+        newPart = random.random() * SumTemp
         
         changedParticle = False
         for i in range(0, maxH):
@@ -104,13 +105,50 @@ def percolation(connection, composition, temperature):
                 if(composition[i,j] == DISILICATE):
                     newPart = newPart - math.exp((temperature[i,j] + 273)/1000)
                 if(newPart <= 0 and changedParticle == False):
-                    connection[i,j] = 1;
-                    changedParticle = True;
+                    connection[i,j] = 1
+                    changedParticle = True
+
+    # Faster, just to test
+    for n in range(0,500):
+        i = int(random.random() * maxH)
+        j = int(random.random() * maxL)
+        if(composition[i,j] == DISILICATE):
+            connection[i, j] = 1
 
 def pathFinder(connection):
     for i in range(0, maxH):
         for j in range(0, maxL):
             A = 0
+
+# to find the path from  
+# top left to bottom right  
+def isPath(arr): 
+     
+    # set arr[0][0] = 1 
+    arr[0][0] = 1
+  
+    # Mark reachable (from top left)  
+    # nodes in first row and first column.  
+    for i in range(1, maxH): 
+        if (arr[i][0] != -1): 
+            arr[i][0] = arr[i-1][0] 
+  
+    for j in range(1, maxL): 
+        if (arr[0][j] != -1): 
+            arr[0][j] = arr[0][j-1] 
+              
+    # Mark reachable nodes in  
+    # remaining matrix.  
+    for i in range(1, maxH): 
+        for j in range(1, maxL): 
+            if (arr[i][j] != -1): 
+                arr[i][j] = max(arr[i][j - 1],  
+                                arr[i - 1][j]) 
+                                  
+    # return yes if right  
+    # bottom index is 1 
+    return (arr[maxH - 1][maxL - 1] == 1) 
+
 
 # Create the Temperature and Composition matrix
 temperature = np.zeros((maxH,maxL))
@@ -156,7 +194,7 @@ for i in range(0, maxH):
 print("Start simulation...")
 nRun = 0
 plt.imshow(temperature, interpolation=INTERPOLATION)
-plt.savefig('test'+str(nRun)+'.png', dpi=1000)
+#plt.savefig('test'+str(nRun)+'.png', dpi=1000)
 while (True):
     nRun += 1
     TOld = temperature
@@ -172,9 +210,20 @@ while (True):
         #plt.imshow(temperature, interpolation=INTERPOLATION)
         #plt.savefig('test'+str(nRun)+'.png', dpi=1000)
         
-        plt.imshow(connection, interpolation=INTERPOLATION)
-        plt.savefig('connection'+str(nRun)+'.png', dpi=100)
-        print("-> Img exported")
+        A = np.logical_not(connection)
+        a = ndimage.distance_transform_edt(A)
+        a = np.logical_not(np.logical_not(a))
+        a = a * -1
+        b = a
+        
+        if (isPath(b)): 
+            print("Yes")  
+        else: 
+            print("No")
+        
+        plt.imshow(A, interpolation=INTERPOLATION)
+        #plt.savefig('connection'+str(nRun)+'.png', dpi=100)
+        #print("-> Img exported")
         #plt.colorbar()
         plt.show()
         plt.pause(0.001)
