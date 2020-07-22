@@ -88,7 +88,7 @@ def heatTransfer(TOld, Compos):
 
 # New connections using Monte Carlo
 def percolation(connection, composition, temperature):
-    for n in range(0,500):
+    for n in range(0,10):
         SumTemp = 1
         # Sum the elements temperature, the percolation probability is related to it
         # This relation is not True, I have to find the correct way to do it
@@ -139,16 +139,6 @@ for i in range(0, maxH):
             if (circle1.y <= j and j <= circle2.y):
                 composition[i,j] = DISILICATE
                 temperature[i,j] = 1000
-                
-# DOG BONE PART 2 - Draw the "body"
-for i in range(0, maxH):
-    for j in range(0, maxL):
-        # Fill the gap between the circle's center
-        # It is splitted with 2 IFs to an easy compreension
-        if(circle1.x - 1 <= i and i <= circle1.x + 1):
-            if (circle1.y <= j and j <= circle2.y):
-                composition[i,j] = DISILICATE
-                temperature[i,j] = 2000
 
 # PLATINUM ELECTRODE
 for i in range(0, maxH):
@@ -183,9 +173,10 @@ while (True):
         #plt.savefig('test'+str(nRun)+'.png', dpi=1000)
         
         plt.imshow(connection, interpolation=INTERPOLATION)
-        #plt.savefig('connection'+str(nRun)+'.png', dpi=1000)
+        plt.savefig('connection'+str(nRun)+'.png', dpi=100)
         print("-> Img exported")
         #plt.colorbar()
         plt.show()
+        plt.pause(0.001)
     else:
         print('.', end='')
